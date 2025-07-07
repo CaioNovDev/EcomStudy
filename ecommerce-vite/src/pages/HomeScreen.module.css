@@ -1,0 +1,9 @@
+.container {
+  background: #f5f6fa;
+  min-height: 100vh;
+}
+.productList {
+  max-width: 900px;
+  margin: 32px auto 0 auto;
+  padding: 0 20px;
+}

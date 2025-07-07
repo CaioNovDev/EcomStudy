@@ -1,0 +1,43 @@
+.header {
+  background: #ffe600;
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid #ececec;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.logo {
+  width: 120px;
+  margin-right: 18px;
+}
+.search {
+  flex: 1;
+  background: #fff;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 16px;
+  border: none;
+  margin-right: 18px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.right {
+  display: flex;
+  align-items: center;
+}
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 1px solid #eee;
+}
+.logout {
+  color: #3483fa;
+  background: none;
+  border: none;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+}
