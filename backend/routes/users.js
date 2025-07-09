@@ -1,20 +1,45 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
-const prisma = require('../prismaClient');
 const router = express.Router();
+const { PrismaClient } = require('@prisma/client');
 
-router.post('/register', async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+const prisma = new PrismaClient();
 
+// 🔍 Listar todos os usuários
+router.get('/', async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: { email, password: hashedPassword },
+    const users = await prisma.user.findMany({
+      select: { id: true, email: true } // não retorna a senha
     });
-    res.status(201).json({ message: 'Usuário criado com sucesso', user: { id: user.id, email: user.email } });
+    res.json(users);
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao criar usuário' });
+    console.error('[ERRO AO LISTAR USUÁRIOS]', err);
+    res.status(500).json({ error: 'Erro ao buscar usuários' });
+  }
+});
+
+// 👤 Buscar usuário por ID
+router.get('/:id', async (req, res) => {
+  const userId = parseInt(req.params.id);
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true }
+    });
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar usuário' });
+  }
+});
+
+// 🗑️ Deletar usuário
+router.delete('/:id', async (req, res) => {
+  const userId = parseInt(req.params.id);
+  try {
+    await prisma.user.delete({ where: { id: userId } });
+    res.json({ message: 'Usuário deletado com sucesso' });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao deletar usuário' });
   }
 });
 

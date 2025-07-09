@@ -2,34 +2,63 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const prisma = require('../prismaClient');
+const { PrismaClient } = require('@prisma/client');
 
-// Segredo forte para estudos
+const prisma = new PrismaClient();
 const SECRET = 'u7$!kPz9@1bX#4qLw2eR8sV0zF3cT6hJ';
 
-router.post('/login', async (req, res) => {
-  const { username, password, captcha } = req.body;
+// Registro de usuário
+router.post('/register', async (req, res) => {
+  const { email, password } = req.body;
 
-  // Valida captcha
-  if (!captcha || captcha.toLowerCase() !== req.session.captcha?.toLowerCase()) {
-    return res.status(400).json({ error: 'Captcha incorreto' });
-  }
-
-  // Limpa o captcha da sessão
-  req.session.captcha = null;
+  if (!email || !password)
+    return res.status(400).json({ error: 'E-mail e senha são obrigatórios' });
 
   try {
-    // Busca o usuário no banco
-    const user = await prisma.user.findUnique({ where: { email: username } });
-    if (!user) return res.status(401).json({ error: 'Credenciais inválidas' });
+    const existingUser = await prisma.user.findUnique({ where: { email } });
 
-    // Compara a senha
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(401).json({ error: 'Credenciais inválidas' });
+    if (existingUser)
+      return res.status(409).json({ error: 'E-mail já está em uso' });
 
-    // Gera o token JWT
-    const token = jwt.sign({ username: user.email }, SECRET, { expiresIn: '1h' });
-    return res.json({ token });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await prisma.user.create({
+      data: { email, password: hashedPassword }
+    });
+
+    res.status(201).json({ message: 'Usuário criado com sucesso', userId: newUser.id });
+  } catch (error) {
+    console.error('[ERRO AO CRIAR USUÁRIO]', error);
+    res.status(500).json({ error: 'Erro ao criar usuário' });
+  }
+});
+
+// Login de usuário
+router.post('/login', async (req, res) => {
+  const { email, password, captcha } = req.body;
+
+  if (!email || !password || !captcha)
+    return res.status(400).json({ error: 'Email, senha e captcha são obrigatórios' });
+
+  if (captcha !== req.session.captcha)
+    return res.status(400).json({ error: 'Captcha inválido' });
+
+  req.session.captcha = null; // limpa após uso
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user)
+      return res.status(401).json({ error: 'Usuário não encontrado' });
+
+    const senhaCorreta = await bcrypt.compare(password, user.password);
+
+    if (!senhaCorreta)
+      return res.status(401).json({ error: 'Senha incorreta' });
+
+    const token = jwt.sign({ userId: user.id }, SECRET, { expiresIn: '1h' });
+
+    res.json({ message: 'Login bem-sucedido', token });
   } catch (err) {
     console.error('Erro no login:', err);
     res.status(500).json({ error: 'Erro interno no servidor' });
