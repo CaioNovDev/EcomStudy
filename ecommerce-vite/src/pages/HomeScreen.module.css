@@ -1,9 +1,18 @@
 .container {
   background: #f5f6fa;
   min-height: 100vh;
+  padding-top: 80px; /* Espaço para o HeaderMenu */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+
 .productList {
-  max-width: 900px;
-  margin: 32px auto 0 auto;
-  padding: 0 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  max-width: 960px;
+  width: 100%;
+  padding: 0 20px 40px;
+  box-sizing: border-box;
 }

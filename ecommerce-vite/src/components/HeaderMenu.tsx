@@ -1,8 +1,7 @@
-// src/components/HeaderMenu.tsx
 import React from "react";
 import styles from "./HeaderMenu.module.css";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // Ajuste o caminho se necessário
+import { useAuth } from "../context/AuthContext";
 
 interface HeaderMenuProps {
   search: string;
@@ -11,11 +10,19 @@ interface HeaderMenuProps {
 
 const HeaderMenu: React.FC<HeaderMenuProps> = ({ search, setSearch }) => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
 
   const handleLogout = () => {
     logout();
     navigate("/");
+  };
+
+  const handleAvatarClick = () => {
+    if (isAuthenticated) {
+      navigate("/profile");
+    } else {
+      navigate("/login");
+    }
   };
 
   return (
@@ -25,6 +32,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({ search, setSearch }) => {
         alt="Logo"
         className={styles.logo}
       />
+
       <input
         type="text"
         placeholder="Buscar produtos..."
@@ -32,15 +40,38 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({ search, setSearch }) => {
         onChange={e => setSearch(e.target.value)}
         className={styles.search}
       />
+
       <div className={styles.right}>
         <img
-          src="https://randomuser.me/api/portraits/men/32.jpg"
+          src={
+            isAuthenticated && user?.avatar
+              ? user.avatar
+              : "https://randomuser.me/api/portraits/men/32.jpg"
+          }
           alt="Avatar"
           className={styles.avatar}
+          style={{ cursor: "pointer" }}
+          onClick={handleAvatarClick}
+          title={isAuthenticated ? "Ir para o perfil" : "Fazer login"}
         />
-        <button className={styles.logout} onClick={handleLogout}>
-          Sair
-        </button>
+
+        {isAuthenticated ? (
+          <>
+            <span className={styles.userName}>
+              {user?.name || user?.email}
+            </span>
+            <button className={styles.logout} onClick={handleLogout}>
+              Sair
+            </button>
+          </>
+        ) : (
+          <button
+            className={styles.login}
+            onClick={() => navigate("/login")}
+          >
+            Entrar
+          </button>
+        )}
       </div>
     </header>
   );

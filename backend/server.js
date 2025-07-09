@@ -1,51 +1,54 @@
+// server.js
+
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
-require('dotenv').config();
 
-// 📦 Rotas da aplicação
-const authRoutes = require('./routes/auth');         // Login + Registro
-const captchaRouter = require('./routes/captcha');   // Geração de captcha SVG
-const productRoutes = require('./routes/products');  // CRUD de produtos
-const userRoutes = require('./routes/users');        // Listar, buscar, deletar usuários
+// Rotas modularizadas
+const authRoutes = require('./routes/auth');          // Login/Registro
+const captchaRouter = require('./routes/captcha');    // Captcha SVG
+const productRoutes = require('./routes/products');   // CRUD de produtos
+const userRoutes = require('./routes/users');         // CRUD de usuários
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// 🔐 CORS: permite frontend se comunicar com backend com cookies
+// Middleware de CORS: permite frontend acessar backend via cookies
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   credentials: true,
 }));
 
-// 🔄 Transforma JSON no corpo das requisições em objetos JS
+// Middleware para interpretar JSON
 app.use(express.json());
 
-// 🧠 Sessão (usada para armazenar captcha)
+// Middleware de sessão (armazenamento temporário, ex: captcha)
 app.use(session({
   secret: process.env.SESSION_SECRET || 'changeme-in-env',
   resave: false,
   saveUninitialized: true,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production', // Use HTTPS em prod
     httpOnly: true,
     sameSite: 'lax',
   }
 }));
 
-// 🔁 Conecta as rotas
-app.use('/api/auth', authRoutes);        // POST /login e /register
-app.use('/api/captcha', captchaRouter);  // GET /api/captcha → retorna imagem SVG
-app.use('/api/products', productRoutes); // GET e POST de produtos
-app.use('/api/users', userRoutes);       // GET, GET/:id e DELETE usuários
+// Conecta rotas principais
+app.use('/api/auth', authRoutes);
+app.use('/api/captcha', captchaRouter);
+app.use('/api/products', productRoutes);
+app.use('/api/users', userRoutes);
 
-// ⚠️ Middleware global de erro
+// Middleware global de tratamento de erros
 app.use((err, req, res, next) => {
   console.error('[UNEXPECTED ERROR]', err);
   res.status(500).json({ error: 'Erro inesperado no servidor.' });
 });
 
-// 🚀 Liga o servidor
+// Inicia o servidor
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });

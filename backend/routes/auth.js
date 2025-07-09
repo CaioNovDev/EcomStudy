@@ -7,7 +7,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const SECRET = 'u7$!kPz9@1bX#4qLw2eR8sV0zF3cT6hJ';
 
-// Registro de usuário
+// Registro de novo usuário
 router.post('/register', async (req, res) => {
   const { email, password } = req.body;
 
@@ -33,17 +33,18 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Login de usuário
+// Login do usuário
 router.post('/login', async (req, res) => {
   const { email, password, captcha } = req.body;
 
+  // Verificações básicas
   if (!email || !password || !captcha)
     return res.status(400).json({ error: 'Email, senha e captcha são obrigatórios' });
 
   if (captcha !== req.session.captcha)
     return res.status(400).json({ error: 'Captcha inválido' });
 
-  req.session.captcha = null; // limpa após uso
+  req.session.captcha = null; // limpa captcha da sessão
 
   try {
     const user = await prisma.user.findUnique({ where: { email } });
@@ -56,11 +57,17 @@ router.post('/login', async (req, res) => {
     if (!senhaCorreta)
       return res.status(401).json({ error: 'Senha incorreta' });
 
+    // Geração do token JWT
     const token = jwt.sign({ userId: user.id }, SECRET, { expiresIn: '1h' });
 
-    res.json({ message: 'Login bem-sucedido', token });
+    // Retorna apenas os dados essenciais
+    res.json({
+      message: 'Login bem-sucedido',
+      token,
+      user: { id: user.id, email: user.email }
+    });
   } catch (err) {
-    console.error('Erro no login:', err);
+    console.error('[ERRO NO LOGIN]', err);
     res.status(500).json({ error: 'Erro interno no servidor' });
   }
 });
