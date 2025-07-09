@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 interface AuthContextType {
   login: (email: string, senha: string, captcha: string) => Promise<boolean | 'captcha'>;
-  // ... outros métodos e estados
+  // Você pode adicionar logout, isAuthenticated, etc.
 }
 
 interface AuthProviderProps {
@@ -15,12 +15,18 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [token, setToken] = useState<string | null>(null);
 
-  const login = async (email: string, senha: string, captcha: string): Promise<boolean | 'captcha'> => {
+  const login = async (
+    email: string,
+    senha: string,
+    captcha: string
+  ): Promise<boolean | 'captcha'> => {
     try {
-      const response = await fetch('http://localhost:3001/api/login', {
+      const response = await fetch('http://localhost:3001/api/auth/login', {
         method: 'POST',
-        credentials: 'include',  // MUITO IMPORTANTE para sessão e cookie
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Necessário para cookies de sessão
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           username: email,
           password: senha,
@@ -42,9 +48,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       const data = await response.json();
       setToken(data.token);
-      // localStorage.setItem('token', data.token); // se quiser persistir
+      // localStorage.setItem('token', data.token); // opcional: persistência
       return true;
-    } catch (err) {
+    } catch (error) {
+      console.error('Erro ao fazer login:', error);
       return false;
     }
   };

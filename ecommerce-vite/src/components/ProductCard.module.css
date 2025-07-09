@@ -1,31 +1,107 @@
+/* ProductCard.module.css */
 .card {
   display: flex;
-  background: #fff;
-  border-radius: 8px;
-  margin-bottom: 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  flex-direction: column;
   align-items: center;
-  overflow: hidden;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 16px;
+  margin: 16px;
+  max-width: 300px;
+  transition: transform 0.2s;
 }
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
 .image {
-  width: 90px;
-  height: 90px;
-  object-fit: cover;
-  background: #f2f2f2;
+  width: 100%;
+  max-width: 220px;
+  height: 220px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #f9f9f9;
 }
+
 .info {
-  flex: 1;
-  padding: 12px;
+  margin-top: 12px;
+  text-align: center;
 }
+
 .name {
-  font-weight: bold;
-  font-size: 15px;
-  color: #333;
-  display: block;
+  font-weight: 600;
+  font-size: 16px;
+  color: #222;
   margin-bottom: 6px;
 }
+
 .price {
-  color: #00a650;
+  font-size: 18px;
   font-weight: bold;
+  color: #008f57;
+}
+
+/* Product grid layout (add to global CSS or ProductList component CSS) */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  padding: 24px;
+}
+
+/* HeaderMenu.module.css */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 16px 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.logo {
+  height: 40px;
+}
+
+.search {
+  flex: 1;
+  margin: 0 24px;
+  padding: 10px 16px;
   font-size: 16px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+.logout {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.logout:hover {
+  background: #c0392b;
 }

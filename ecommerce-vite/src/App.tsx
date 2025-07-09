@@ -6,9 +6,12 @@ import AppRoutes from './routes/AppRoutes';
 function App() {
   return (
     <AuthProvider>
-      <AppRoutes />
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '1rem' }}>
+        <AppRoutes />
+      </div>
     </AuthProvider>
   );
 }
+
 
 export default App;
