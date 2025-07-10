@@ -1,7 +1,9 @@
+// src/pages/HomeScreen.tsx
 import React, { useState, useEffect } from "react";
 import HeaderMenu from "../components/HeaderMenu";
 import ProductCard from "../components/ProductCard";
 import styles from "./HomeScreen.module.css";
+import { useAuth } from "../context/AuthContext";
 
 interface Product {
   id: number;
@@ -13,6 +15,7 @@ interface Product {
 const HomeScreen: React.FC = () => {
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
+  const { logout } = useAuth();
 
   // 🔄 Carrega os produtos do backend
   useEffect(() => {
@@ -27,17 +30,12 @@ const HomeScreen: React.FC = () => {
     product.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  // 🚪 Logout fictício por enquanto
-  const handleLogout = () => {
-    alert("Logout!");
-  };
-
   return (
     <div className={styles.container}>
       <HeaderMenu
         search={search}
         setSearch={setSearch}
-        onLogout={handleLogout}
+        onLogout={logout}
       />
 
       <div className={styles.productList}>

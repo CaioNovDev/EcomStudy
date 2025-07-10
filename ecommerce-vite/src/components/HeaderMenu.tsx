@@ -1,3 +1,4 @@
+// src/components/HeaderMenu.tsx
 import React from "react";
 import styles from "./HeaderMenu.module.css";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +11,9 @@ interface HeaderMenuProps {
 
 const HeaderMenu: React.FC<HeaderMenuProps> = ({ search, setSearch }) => {
   const navigate = useNavigate();
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isLoading } = useAuth();
+
+  const isAuthenticated = !!user;
 
   const handleLogout = () => {
     logout();
@@ -18,11 +21,8 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({ search, setSearch }) => {
   };
 
   const handleAvatarClick = () => {
-    if (isAuthenticated) {
-      navigate("/profile");
-    } else {
-      navigate("/login");
-    }
+    if (isLoading) return; // evita navegação antes de confirmar autenticação
+    navigate(isAuthenticated ? "/profile" : "/login");
   };
 
   return (
@@ -50,27 +50,32 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({ search, setSearch }) => {
           }
           alt="Avatar"
           className={styles.avatar}
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", opacity: isLoading ? 0.5 : 1 }}
           onClick={handleAvatarClick}
-          title={isAuthenticated ? "Ir para o perfil" : "Fazer login"}
+          title={
+            isLoading
+              ? "Verificando sessão..."
+              : isAuthenticated
+              ? "Ir para o perfil"
+              : "Fazer login"
+          }
         />
 
         {isAuthenticated ? (
           <>
             <span className={styles.userName}>
-              {user?.name || user?.email}
+              {user?.name || user.email}
             </span>
             <button className={styles.logout} onClick={handleLogout}>
               Sair
             </button>
           </>
         ) : (
-          <button
-            className={styles.login}
-            onClick={() => navigate("/login")}
-          >
-            Entrar
-          </button>
+          !isLoading && (
+            <button className={styles.login} onClick={() => navigate("/login")}>
+              Entrar
+            </button>
+          )
         )}
       </div>
     </header>

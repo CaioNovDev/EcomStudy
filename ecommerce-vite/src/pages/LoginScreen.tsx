@@ -1,3 +1,4 @@
+// src/pages/LoginScreen.tsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -9,42 +10,43 @@ const LoginScreen: React.FC = () => {
   const [captchaInput, setCaptchaInput] = useState('');
   const [captchaSvg, setCaptchaSvg] = useState('');
   const [erro, setErro] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Função para carregar o captcha SVG
   const loadCaptcha = () => {
-    fetch('http://localhost:3001/api/captcha', { credentials: 'include' }) // 'include' para enviar cookies/sessão
+    fetch('http://localhost:3001/api/captcha', { credentials: 'include' })
       .then(res => res.text())
       .then(svg => setCaptchaSvg(svg))
       .catch(() => setErro('Erro ao carregar captcha'));
   };
 
-  // Carrega captcha na montagem do componente
   useEffect(() => {
     loadCaptcha();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!email || !senha || !captchaInput) {
       setErro('Preencha email, senha e captcha!');
       return;
     }
 
-    // Passa o captchaInput para o login
+    setLoading(true);
     const ok = await login(email, senha, captchaInput);
+    setLoading(false);
 
     if (ok === 'captcha') {
       setErro('Captcha incorreto. Tente novamente.');
       setCaptchaInput('');
-      loadCaptcha(); // recarrega o captcha
+      loadCaptcha();
     } else if (ok) {
       setErro('');
       navigate('/home');
     } else {
       setErro('Email ou senha inválidos');
       setCaptchaInput('');
-      loadCaptcha(); // recarrega o captcha para nova tentativa
+      loadCaptcha();
     }
   };
 
@@ -56,6 +58,7 @@ const LoginScreen: React.FC = () => {
           alt="Mercado Livre"
           style={styles.logo}
         />
+
         <input
           style={styles.input}
           type="email"
@@ -71,7 +74,6 @@ const LoginScreen: React.FC = () => {
           onChange={e => setSenha(e.target.value)}
         />
 
-        {/* Mostrar o captcha SVG */}
         <div
           style={{ marginBottom: 12, cursor: 'pointer' }}
           onClick={loadCaptcha}
@@ -79,7 +81,6 @@ const LoginScreen: React.FC = () => {
           title="Clique para recarregar captcha"
         />
 
-        {/* Input do captcha */}
         <input
           style={styles.input}
           type="text"
@@ -90,8 +91,8 @@ const LoginScreen: React.FC = () => {
 
         {erro && <div style={styles.error}>{erro}</div>}
 
-        <button type="submit" style={styles.button}>
-          Entrar
+        <button type="submit" style={styles.button} disabled={loading}>
+          {loading ? 'Entrando...' : 'Entrar'}
         </button>
       </form>
     </div>
@@ -99,7 +100,6 @@ const LoginScreen: React.FC = () => {
 };
 
 const styles: { [key: string]: React.CSSProperties } = {
-  // seu estilo permanece igual
   bg: {
     minHeight: '100vh',
     background: '#fff',
